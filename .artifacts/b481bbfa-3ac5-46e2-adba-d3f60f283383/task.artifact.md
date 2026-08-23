@@ -1,19 +1,14 @@
-# Tasks - Offline Resilience & Local Security
+# Tasks - App Publishing Preparation
 
-- [x] 1. Data Layer Updates
-    - [x] Update `ScamDao` with `getScamCallByNumber`
-    - [x] Create `ManualBlock` entity
-    - [x] Add `ManualBlock` to `ScamDatabase` (Version 3)
-- [x] 2. Repository Logic
-    - [x] Update `PhoneRepository` to check local DB first (Handled in Service)
-    - [x] Add network error handling
-- [x] 3. Call Screening Enhancements
-    - [x] Implement manual blocklist check
-    - [x] Implement international number heuristic
-    - [x] Add logging for "Offline Protection" usage
-- [x] 4. UI Updates
-    - [x] Add "Block/Unblock" button in History tab
-    - [x] Show risk level badges for cached entries
-- [x] 5. Verification
-    - [x] Build and sync
-    - [x] Verify offline blocking logic
+- [x] 1. App Metadata & Branding
+    - [x] Update `strings.xml` (App Name: SASSA Shield)
+    - [x] Clean up unused resources
+- [x] 2. Build Configuration
+    - [x] Create `proguard-rules.pro`
+    - [x] Update `app/build.gradle.kts` for Release builds (Minify/Shrink)
+- [x] 3. Code Cleanup
+    - [x] Remove debug logging
+    - [x] Ensure `BuildConfig` is used correctly
+- [x] 4. Verification
+    - [x] Assemble Release build
+    - [x] Final UI/UX check
