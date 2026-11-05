@@ -5,8 +5,16 @@ import com.example.myapplication.network.AbstractPhoneResponse
 import com.example.myapplication.network.AbstractPhoneService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
+sealed class PhoneValidationResult {
+    data class Success(val response: AbstractPhoneResponse) : PhoneValidationResult()
+    data class ApiError(val code: Int, val message: String?) : PhoneValidationResult()
+    data class NetworkError(val exception: Exception) : PhoneValidationResult()
+    object NoApiKey : PhoneValidationResult()
+}
 
 class PhoneRepository {
 
@@ -29,19 +37,20 @@ class PhoneRepository {
         service = retrofit.create(AbstractPhoneService::class.java)
     }
 
-    suspend fun validatePhone(phone: String): AbstractPhoneResponse? {
-        if (BuildConfig.ABSTRACT_API_KEY.isEmpty()) return null
-        
+    suspend fun validatePhone(phone: String): PhoneValidationResult {
+        if (BuildConfig.ABSTRACT_API_KEY.isEmpty()) return PhoneValidationResult.NoApiKey
+
         return try {
-            val response = service.validatePhone(BuildConfig.ABSTRACT_API_KEY, phone)
+            val response: Response<AbstractPhoneResponse> = service.validatePhone(BuildConfig.ABSTRACT_API_KEY, phone)
             if (response.isSuccessful) {
-                response.body()
+                response.body()?.let {
+                    PhoneValidationResult.Success(it)
+                } ?: PhoneValidationResult.ApiError(response.code() ?: -1, "Empty response body")
             } else {
-                null
+                PhoneValidationResult.ApiError(response.code(), response.errorBody()?.string())
             }
         } catch (e: Exception) {
-            // Log error or handle specific exceptions like UnknownHostException (offline)
-            null
+            PhoneValidationResult.NetworkError(e)
         }
     }
 }

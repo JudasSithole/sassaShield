@@ -5,6 +5,7 @@ import android.telecom.CallScreeningService
 import com.example.myapplication.data.ScamCall
 import com.example.myapplication.data.ScamDatabase
 import com.example.myapplication.repository.PhoneRepository
+import com.example.myapplication.repository.PhoneValidationResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,8 +53,9 @@ class MyCallScreeningService : CallScreeningService() {
 
             // 4. API Check (Requires Network)
             if (!shouldBlock) {
-                val response = repository.validatePhone(phoneNumber)
-                if (response != null && response.valid) {
+                val result = repository.validatePhone(phoneNumber)
+                if (result is PhoneValidationResult.Success) {
+                    val response = result.response
                     val risk = response.riskAssessment
                     riskLevel = risk?.riskLevel ?: "low"
                     val isAbuse = risk?.isAbuseDetected == true
@@ -76,6 +78,13 @@ class MyCallScreeningService : CallScreeningService() {
                             wasBlocked = shouldBlock
                         )
                     )
+                } else {
+                    // API unavailable (no key, network error, or API error) — fail open, do not block
+                    if (result !is PhoneValidationResult.NoApiKey) {
+                        wasFlagged = true
+                        reason = "Phone validation unavailable (${result::class.simpleName})"
+                        riskLevel = "medium"
+                    }
                 }
             }
 

@@ -20,7 +20,11 @@ abstract class ScamDatabase : RoomDatabase() {
                     ScamDatabase::class.java,
                     "scam_database"
                 )
-                .fallbackToDestructiveMigration(true)
+                // TODO: Replace fallbackToDestructiveMigration with proper Room migrations once
+                // room-runtime dependency is resolved. Destructive migration wipes user data on
+                // schema changes; fallbackToDestructiveMigration(false) prevents data loss but will
+                // fail to open if the schema version mismatches.
+                .fallbackToDestructiveMigration(false)
                 .build()
                 INSTANCE = instance
                 instance
